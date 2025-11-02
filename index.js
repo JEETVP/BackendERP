@@ -26,7 +26,7 @@ app.use(
   })
 );
 // Manejo de preflight explícito (opcional)
-app.options('*', cors());
+app.options('(.*)', cors()); // compatible con path-to-regexp v6
 
 // ====== Rutas públicas mínimas ======
 app.get('/', (_req, res) => {
