@@ -98,8 +98,6 @@ const inventoryTransactionSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    versionKey: true,             // __v
-    optimisticConcurrency: true,  // evita "lost updates"
     toJSON: {
       virtuals: true,
       transform: (_doc, ret) => {

@@ -93,8 +93,6 @@ const medicationSchema = new mongoose.Schema(
   {
     timestamps: true,
     // importante para evitar "lost updates" en ambientes concurrentes
-    versionKey: true,                // __v
-    optimisticConcurrency: true,     // usa __v para concurrencia optimista
     toJSON: {
       virtuals: true,
       transform: (_doc, ret) => {

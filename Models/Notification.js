@@ -71,8 +71,6 @@ const notificationSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    versionKey: true,
-    optimisticConcurrency: true,
     toJSON: {
       virtuals: true,
       transform: (_doc, ret) => {
