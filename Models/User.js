@@ -28,8 +28,8 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: 10, // asumiendo ya hash (bcrypt ~60 chars), 10 es seguro para validar presencia
-      select: false, // excluye por defecto en queries
+      minlength: 10,       // el hash de bcrypt cumple de sobra
+      select: false,       // excluye por defecto en queries
     },
 
     // Rol operativo
@@ -72,13 +72,13 @@ const userSchema = new mongoose.Schema(
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
-    // Para rotación de credenciales / invalidar sesiones
+    // Para invalidar sesiones tras cambio de password
     passwordChangedAt: { type: Date },
   },
   {
     timestamps: true,
-    versionKey: false,             // __v
-    optimisticConcurrency: true,  // evita "lost updates"
+    versionKey: '__v',           // ✅ requerido cuando usamos optimisticConcurrency
+    optimisticConcurrency: true, // evita "lost updates"
     toJSON: {
       virtuals: true,
       transform: (_doc, ret) => {
@@ -106,43 +106,29 @@ userSchema.pre('validate', function (next) {
   if (this.email) this.email = this.email.trim().toLowerCase();
   if (this.role) this.role = String(this.role).toLowerCase().trim();
 
-  // Si es superusuario, ignora restricciones de rol/status (a tu criterio)
   if (this.isSuperUser && this.status === 'blocked') {
     return next(new Error('Superuser cannot be blocked (use caution)'));
   }
-
   next();
 });
 
 /* =========================
    Métodos de dominio
    ========================= */
-// ¿Tiene el rol (o es superusuario)?
 userSchema.methods.hasRole = function (...roles) {
   if (this.isSuperUser) return true;
   return roles.map(r => String(r).toLowerCase()).includes(this.role);
 };
 
-// Objeto seguro para respuestas
 userSchema.methods.toSafeObject = function () {
   const { _id, email, name, role, isSuperUser, hospital, status, lastLoginAt } = this;
-  return {
-    id: _id,
-    email,
-    name,
-    role,
-    isSuperUser,
-    hospital,
-    status,
-    lastLoginAt,
-  };
+  return { id: _id, email, name, role, isSuperUser, hospital, status, lastLoginAt };
 };
 
-// Para invalidar JWTs emitidos antes de un cambio de contraseña
 userSchema.methods.changedPasswordAfter = function (jwtIatSeconds) {
   if (!this.passwordChangedAt) return false;
-  const changedTimestamp = Math.floor(this.passwordChangedAt.getTime() / 1000);
-  return changedTimestamp > jwtIatSeconds;
+  const changedTs = Math.floor(this.passwordChangedAt.getTime() / 1000);
+  return changedTs > jwtIatSeconds;
 };
 
 module.exports = mongoose.model('User', userSchema);
