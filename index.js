@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -25,9 +24,6 @@ app.use(
     exposedHeaders: ['Content-Length','X-Request-Id'],
   })
 );
-// Manejo de preflight explícito (opcional)
-app.options('(.*)', cors()); // compatible con path-to-regexp v6
-
 // ====== Rutas públicas mínimas ======
 app.get('/', (_req, res) => {
   res.json({ ok: true, name: 'ERP API', version: '1.0.0' });
