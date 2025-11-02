@@ -77,7 +77,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    versionKey: true,             // __v
+    versionKey: false,             // __v
     optimisticConcurrency: true,  // evita "lost updates"
     toJSON: {
       virtuals: true,
