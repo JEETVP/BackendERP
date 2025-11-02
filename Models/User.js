@@ -95,7 +95,6 @@ const userSchema = new mongoose.Schema(
 /* =========================
    Índices útiles
    ========================= */
-userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ hospital: 1, role: 1 });
 userSchema.index({ status: 1, lastLoginAt: -1 });
 

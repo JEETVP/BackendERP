@@ -69,9 +69,6 @@ const hospitalSchema = new mongoose.Schema(
   }
 );
 
-// Índices compuestos útiles para búsquedas
-hospitalSchema.index({ code: 1 }, { unique: true });
-hospitalSchema.index({ name: 1, status: 1 });
 
 // Normaliza code antes de validar/guardar
 hospitalSchema.pre('validate', function (next) {
