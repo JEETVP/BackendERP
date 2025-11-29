@@ -1,7 +1,7 @@
 // seeders/seedSuperUser.js
 require('dotenv').config();
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const User = require('../Models/User');
 
 // Puedes controlar estos datos por variables de entorno
