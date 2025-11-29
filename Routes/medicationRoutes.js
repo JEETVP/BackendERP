@@ -15,4 +15,6 @@ router.get('/:id', requireAuth, ctrl.getMedication);
 // Actualizar stock (increment/decrement/set)
 router.post('/:id/stock', requireAuth, requireRole('admin','manager'), ctrl.updateStock);
 
+// Buscar SOLO por nombre
+router.get('/search/by-name', requireAuth, ctrl.searchMedicationByName);
 module.exports = router;

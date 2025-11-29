@@ -169,6 +169,65 @@ exports.getMedication = async (req, res, next) => {
     next(err);
   }
 };
+// Helper local para escapar caracteres especiales en regex
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * GET /api/medications/search/by-name?q=ibupro
+ * Busca SOLO por nombre (case-insensitive, contiene).
+ * Soporta paginación opcional: ?page=&limit=
+ */
+exports.searchMedicationByName = async (req, res, next) => {
+  try {
+    const { q, page = 1, limit = 20 } = req.query;
+
+    const term = (q || '').trim();
+    if (!term) {
+      return res.status(400).json({
+        ok: false,
+        message: 'El parámetro q (nombre del medicamento) es requerido'
+      });
+    }
+
+    // Reglas de negocio suaves: evitar búsquedas de 1 letra
+    if (term.length < 2) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Ingresa al menos 2 caracteres para buscar por nombre'
+      });
+    }
+
+    const pg  = Math.max(parseInt(page, 10) || 1, 1);
+    const lim = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 200);
+    const skip = (pg - 1) * lim;
+
+    const regex = new RegExp(escapeRegex(term), 'i');
+
+    const [rows, total] = await Promise.all([
+      Medication.find({ name: regex })
+        .sort({ name: 1 })
+        .skip(skip)
+        .limit(lim),
+      Medication.countDocuments({ name: regex })
+    ]);
+
+    return res.json({
+      ok: true,
+      data: rows,
+      meta: {
+        page: pg,
+        limit: lim,
+        total,
+        pages: Math.ceil(total / lim),
+        query: term
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 /**
  * POST /api/medications/:id/stock
