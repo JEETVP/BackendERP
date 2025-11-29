@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
+const ensureSuperUser = require('./Utils/ensureSuperUser');
 
 // ====== Crear app ======
 const app = express();
@@ -24,6 +25,7 @@ app.use(
     exposedHeaders: ['Content-Length','X-Request-Id'],
   })
 );
+
 // ====== Rutas públicas mínimas ======
 app.get('/', (_req, res) => {
   res.json({ ok: true, name: 'ERP API', version: '1.0.0' });
@@ -83,8 +85,13 @@ mongoose
     serverSelectionTimeoutMS: 10000,
     socketTimeoutMS: 45000,
   })
-  .then(() => {
+  .then(async () => {
     console.log('✅ MongoDB connected');
+
+    // 🔥 Asegurar superusuario automático al levantar el servidor
+    await ensureSuperUser();
+
+    // 🔥 Arrancar servidor una vez listo el superuser (o al menos intentado)
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch((err) => {
@@ -93,3 +100,4 @@ mongoose
   });
 
 module.exports = app;
+
